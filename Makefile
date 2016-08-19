@@ -1,7 +1,7 @@
 SHELL := /bin/bash
 
 # Dependency Versions
-VERSION?=3.4.9
+VERSION?=3.4.14
 RELEASEVER?=1
 
 # Bash data
@@ -29,27 +29,46 @@ gnutls:
 		--without-p11-kit \
 		--with-included-libtasn1 \
 		--with-default-trust-store-file=/etc/ssl/ca-bundle.crt \
-		--mandir=/usr/share/man/gnutls-$(VERSION) \
-		--infodir=/usr/share/info/gnutls-$(VERSION) \
-	    --docdir=/usr/share/doc/gnutls-$(VERSION) && \
+		--mandir=/usr/share/man/gnutls/$(VERSION) \
+		--infodir=/usr/share/info/gnutls/$(VERSION) \
+	    --docdir=/usr/share/doc/gnutls/$(VERSION) && \
 	make -j$(CORES) && \
 	make install
 
-package:
-	cp $(SCRIPTPATH)/*-pak  /tmp/gnutls-$(VERSION)
+fpm_debian:
+	echo "Packaging gnutls3 for Debian"
 
-	cd /tmp/gnutls-$(VERSION) && \
-	checkinstall \
-	    -D \
-	    --fstrans \
-	    -pkgrelease "$(RELEASEVER)"-"$(RELEASE)" \
-	    -pkgrelease "$(RELEASEVER)"~"$(RELEASE)" \
-	    -pkgname "gnutls3" \
-	    -pkglicense GPLv3 \
-	    -pkggroup GPG \
-	    -maintainer charlesportwoodii@ethreal.net \
-	    -provides "gnutls3" \
-	    -requires "libunbound2" \
-	    -conflicts "libgnutls-dev" \
-	    -pakdir /tmp \
-	    -y
+	cd /tmp/gnutls-$(VERSION) && make install DESTDIR=/tmp/gnutls3-$(VERSION)-install
+
+	fpm -s dir \
+		-t deb \
+		-n gnutls3 \
+		-v $(VERSION)-$(RELEASEVER)~$(shell lsb_release --codename | cut -f2) \
+		-C /tmp/gnutls3-$(VERSION)-install \
+		-p gnutls3_$(VERSION)-$(RELEASEVER)~$(shell lsb_release --codename | cut -f2)_$(shell arch).deb \
+		-m "charlesportwoodii@erianna.com" \
+		--license "GPLv3" \
+		--url https://github.com/charlesportwoodii/librotli-build \
+		--description "gnutls3" \
+		--depends "libunbound2 > 0" \
+		--conflicts "libgnutls-dev > 0" \
+		--deb-systemd-restart-after-upgrade
+
+fpm_rpm:
+	echo "Packaging gnutls3 for RPM"
+
+	cd /tmp/gnutls-$(VERSION) && make install DESTDIR=/tmp/gnutls3-$(VERSION)-install
+
+	fpm -s dir \
+		-t rpm \
+		-n gnutls3 \
+		-v $(VERSION)_$(RELEASEVER) \
+		-C /tmp/gnutls3-install \
+		-p gnutls3_$(VERSION)-$(RELEASEVER)_$(shell arch).rpm \
+		-m "charlesportwoodii@erianna.com" \
+		--license "GPLv3" \
+		--url https://github.com/charlesportwoodii/gnutls3-build \
+		--description "gnutls3" \
+		--vendor "Charles R. Portwood II" \
+		--rpm-digest sha384 \
+		--rpm-compression gzip
