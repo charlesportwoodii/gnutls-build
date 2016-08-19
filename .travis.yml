@@ -11,8 +11,7 @@ services:
 
 before_install:
   - sudo rm /usr/local/bin/docker-compose
-  - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname
-  -s`-`uname -m` > docker-compose
+  - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
   - chmod +x docker-compose
   - sudo mv docker-compose /usr/local/bin
   - mkdir -p build/deb/trusty build/deb/xenial build/rpm/CentOS/7/x86_64
@@ -21,7 +20,7 @@ script:
   - docker-compose run $BUILD_IMAGE
   - mv *xenial*.deb build/deb/xenial || true
   - mv *trusty*.deb build/deb/trusty || true
-  
+
 deploy:
   provider: s3
   access_key_id: AKIAJ5QCEUQ2WVNY7GDA
