@@ -1,7 +1,7 @@
 SHELL := /bin/bash
 
 # Dependency Versions
-VERSION?=3.4.17
+VERSION?=3.5.12
 RELEASEVER?=1
 
 # Bash data
@@ -28,6 +28,7 @@ gnutls:
 		--prefix=/usr \
 		--without-p11-kit \
 		--with-included-libtasn1 \
+		--with-included-unistring \
 		--with-default-trust-store-file=/etc/ssl/ca-bundle.crt \
 		--mandir=/usr/share/man/gnutls/$(VERSION) \
 		--infodir=/usr/share/info/gnutls/$(VERSION) \
